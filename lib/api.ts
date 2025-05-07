@@ -30,7 +30,7 @@ export async function getProfiles(searchQuery = "") {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session) {
-    redirect("/auth")
+    return []
   }
 
   let query = supabase.from("profiles").select("*")
@@ -46,7 +46,7 @@ export async function getProfiles(searchQuery = "") {
     return []
   }
 
-  return data
+  return data || []
 }
 
 export async function getFeedbackList() {
@@ -56,7 +56,7 @@ export async function getFeedbackList() {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session) {
-    redirect("/auth")
+    return []
   }
 
   const userId = session.user.id
@@ -78,7 +78,7 @@ export async function getFeedbackList() {
   }
 
   // Transform the data to match our UI needs
-  return feedbackData.map((item) => {
+  return (feedbackData || []).map((item) => {
     const isSender = item.sender_id === userId
     const otherPerson = isSender ? item.receiver : item.sender
 
@@ -91,7 +91,7 @@ export async function getFeedbackList() {
 
     return {
       id: item.id,
-      person: otherPerson.full_name,
+      person: otherPerson?.full_name || "Unknown",
       personId: isSender ? item.receiver_id : item.sender_id,
       type: isSender
         ? item.is_wish
@@ -119,7 +119,7 @@ export async function getFeedbackById(id: string) {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session) {
-    redirect("/auth")
+    return null
   }
 
   const { data, error } = await supabase
