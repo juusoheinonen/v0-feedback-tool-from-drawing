@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #6559ff;
+  --secondary: #2c3f6b;
+  --background: #ffffff;
+  --foreground: #111827;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl font-bold;
+  }
+  h2 {
+    @apply text-xl font-semibold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#6559FF];
+    @apply text-white;
+    @apply px-4 py-2;
+    @apply rounded-md;
+    @apply hover:bg-opacity-90;
+    @apply transition-all;
+  }
+
+  .btn-secondary {
+    @apply bg-[#2C3F6B];
+    @apply text-white;
+    @apply px-4 py-2;
+    @apply rounded-md;
+    @apply hover:bg-opacity-90;
+    @apply transition-all;
+  }
+
+  .btn-outline {
+    @apply border;
+    @apply border-[#6559FF];
+    @apply text-[#6559FF];
+    @apply px-4 py-2;
+    @apply rounded-md;
+    @apply hover:bg-[#6559FF];
+    @apply hover:bg-opacity-10;
+    @apply transition-all;
+  }
+
+  .card {
+    @apply bg-white;
+    @apply rounded-lg;
+    @apply shadow-md;
+    @apply p-6;
+  }
+}
