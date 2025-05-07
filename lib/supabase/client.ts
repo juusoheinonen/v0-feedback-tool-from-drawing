@@ -7,8 +7,23 @@ import type { Database } from "@/lib/database.types"
 let supabaseClient: ReturnType<typeof createClientComponentClient<Database>> | null = null
 
 export const getSupabaseClient = () => {
+  if (typeof window === "undefined") {
+    // Server-side - create a new instance each time
+    return createClientComponentClient<Database>()
+  }
+
+  // Client-side - reuse the instance
   if (!supabaseClient) {
-    supabaseClient = createClientComponentClient<Database>()
+    supabaseClient = createClientComponentClient<Database>({
+      options: {
+        auth: {
+          flowType: "pkce",
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      },
+    })
   }
   return supabaseClient
 }

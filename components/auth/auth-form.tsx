@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getSupabaseClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,12 @@ export default function AuthForm() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = getSupabaseClient()
+  const [siteUrl, setSiteUrl] = useState("")
+
+  useEffect(() => {
+    // Get the current site URL
+    setSiteUrl(window.location.origin)
+  }, [])
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,6 +65,7 @@ export default function AuthForm() {
             role,
             location,
           },
+          emailRedirectTo: `${siteUrl}/api/auth/callback`,
         },
       })
 
@@ -66,7 +73,7 @@ export default function AuthForm() {
 
       // After sign up, update the profile with additional information
       setIsSignUp(false)
-      setError("Account created! Please sign in.")
+      setError("Account created! Please check your email for confirmation.")
     } catch (error: any) {
       setError(error.message || "An error occurred during sign up")
     } finally {
