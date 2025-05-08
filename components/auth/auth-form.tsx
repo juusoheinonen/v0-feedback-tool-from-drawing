@@ -56,22 +56,39 @@ export default function AuthForm() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // First, sign up the user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
-            role,
-            location,
+            role: role,
+            location: location,
           },
           emailRedirectTo: `${siteUrl}/api/auth/callback`,
         },
       })
 
-      if (error) throw error
+      if (signUpError) throw signUpError
 
-      // After sign up, update the profile with additional information
+      // If sign up is successful and we have a user, update the profile directly
+      if (authData.user) {
+        // Update the profile with additional information
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            full_name: fullName,
+            role: role,
+            location: location,
+          })
+          .eq("id", authData.user.id)
+
+        if (updateError) {
+          console.error("Error updating profile:", updateError)
+        }
+      }
+
       setIsSignUp(false)
       setError("Account created! Please check your email for confirmation.")
     } catch (error: any) {

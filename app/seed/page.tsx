@@ -8,22 +8,29 @@ import { useRouter } from "next/navigation"
 export default function SeedPage() {
   const [loading, setLoading] = useState(false)
   const [functionCreated, setFunctionCreated] = useState(false)
+  const [triggersCreated, setTriggersCreated] = useState(false)
   const [result, setResult] = useState<{ success: boolean; logs: string[] } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Create the SQL function on page load
-    const createFunction = async () => {
+    // Create the SQL function and triggers on page load
+    const setupDatabase = async () => {
       try {
-        const response = await fetch("/api/seed/create-function")
-        const data = await response.json()
-        setFunctionCreated(data.success)
+        // Create functions
+        const functionResponse = await fetch("/api/seed/create-function")
+        const functionData = await functionResponse.json()
+        setFunctionCreated(functionData.success)
+
+        // Create triggers
+        const triggerResponse = await fetch("/api/setup-triggers")
+        const triggerData = await triggerResponse.json()
+        setTriggersCreated(triggerData.success)
       } catch (error) {
-        console.error("Error creating function:", error)
+        console.error("Error setting up database:", error)
       }
     }
 
-    createFunction()
+    setupDatabase()
   }, [])
 
   const handleSeed = async () => {
@@ -47,9 +54,9 @@ export default function SeedPage() {
         with test data.
       </p>
 
-      {!functionCreated && (
+      {(!functionCreated || !triggersCreated) && (
         <div className="p-4 mb-6 rounded-md bg-yellow-100">
-          <p className="text-yellow-800">Setting up database functions...</p>
+          <p className="text-yellow-800">Setting up database functions and triggers...</p>
         </div>
       )}
 
@@ -73,7 +80,7 @@ export default function SeedPage() {
       )}
 
       <div className="flex gap-4">
-        <Button onClick={handleSeed} disabled={loading || !functionCreated}>
+        <Button onClick={handleSeed} disabled={loading || !functionCreated || !triggersCreated}>
           {loading ? "Seeding..." : "Seed Database"}
         </Button>
         {result?.success && (
@@ -81,6 +88,16 @@ export default function SeedPage() {
             Go to Dashboard
           </Button>
         )}
+      </div>
+
+      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+        <h2 className="text-lg font-semibold mb-2">Admin Tools</h2>
+        <p className="mb-4 text-sm text-gray-600">
+          If you have existing users with missing profile data, you can fix them using the admin tool.
+        </p>
+        <Button variant="outline" onClick={() => router.push("/admin/fix-profiles")}>
+          Fix User Profiles
+        </Button>
       </div>
     </div>
   )
