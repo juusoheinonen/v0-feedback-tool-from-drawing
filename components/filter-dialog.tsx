@@ -35,30 +35,54 @@ export default function FilterDialog({ isOpen, onClose, filters, setFilters }: F
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle>Filter Feedback</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-900">Filter Feedback</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="received" checked={filters.received} onCheckedChange={() => handleFilterChange("received")} />
-            <Label htmlFor="received">Feedback Received</Label>
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="received"
+              checked={filters.received}
+              onCheckedChange={() => handleFilterChange("received")}
+              className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="received" className="text-gray-700 font-medium">
+              Feedback Received
+            </Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="sent" checked={filters.sent} onCheckedChange={() => handleFilterChange("sent")} />
-            <Label htmlFor="sent">Feedback Sent</Label>
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="sent"
+              checked={filters.sent}
+              onCheckedChange={() => handleFilterChange("sent")}
+              className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="sent" className="text-gray-700 font-medium">
+              Feedback Sent
+            </Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="wishSent" checked={filters.wishSent} onCheckedChange={() => handleFilterChange("wishSent")} />
-            <Label htmlFor="wishSent">Wish Sent</Label>
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="wishSent"
+              checked={filters.wishSent}
+              onCheckedChange={() => handleFilterChange("wishSent")}
+              className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="wishSent" className="text-gray-700 font-medium">
+              Wish Sent
+            </Label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <Checkbox
               id="wishReceived"
               checked={filters.wishReceived}
               onCheckedChange={() => handleFilterChange("wishReceived")}
+              className="h-5 w-5 border-gray-300 text-primary focus:ring-primary"
             />
-            <Label htmlFor="wishReceived">Wish Received</Label>
+            <Label htmlFor="wishReceived" className="text-gray-700 font-medium">
+              Wish Received
+            </Label>
           </div>
         </div>
       </DialogContent>

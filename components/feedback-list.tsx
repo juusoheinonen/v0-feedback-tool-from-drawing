@@ -4,6 +4,7 @@ import { useState } from "react"
 import { User, Filter } from "lucide-react"
 import Link from "next/link"
 import FilterDialog from "./filter-dialog"
+import { Button } from "@/components/ui/button"
 
 interface FeedbackItem {
   id: string
@@ -57,13 +58,14 @@ export default function FeedbackList({ initialItems }: FeedbackListProps) {
   return (
     <>
       <div className="flex justify-end mb-4">
-        <button
-          className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
+        <Button
           onClick={() => setIsFilterOpen(true)}
+          variant="outline"
+          className="flex items-center gap-2 text-gray-700 hover:text-primary border-gray-300 hover:border-primary"
         >
           <Filter size={18} />
           <span>Filter</span>
-        </button>
+        </Button>
       </div>
 
       <FilterDialog
@@ -74,8 +76,15 @@ export default function FeedbackList({ initialItems }: FeedbackListProps) {
       />
 
       <div className="space-y-4">
-        {filteredItems.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No feedback items match your filters</div>
+        {initialItems.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-gray-500 mb-2">No feedback items found</p>
+            <p className="text-sm text-gray-400">Give or request feedback to see items here</p>
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-gray-500">No feedback items match your filters</p>
+          </div>
         ) : (
           filteredItems.map((item) => (
             <Link

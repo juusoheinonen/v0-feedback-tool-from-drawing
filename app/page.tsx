@@ -1,8 +1,12 @@
 import Link from "next/link"
 import FeedbackList from "@/components/feedback-list"
-import { getFeedbackList } from "@/lib/api"
+import { getFeedbackList, setupDatabaseRelations } from "@/lib/api"
 
 export default async function Home() {
+  // Setup database relations first to ensure foreign keys are configured
+  await setupDatabaseRelations()
+
+  // Then get the feedback list
   const feedbackItems = await getFeedbackList()
 
   return (

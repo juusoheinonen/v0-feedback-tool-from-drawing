@@ -61,14 +61,10 @@ export async function getFeedbackList() {
 
   const userId = session.user.id
 
-  // Get all feedback where the user is either sender or receiver
+  // Use simpler query first to avoid foreign key issues
   const { data: feedbackData, error } = await supabase
     .from("feedback")
-    .select(`
-      *,
-      sender:profiles!feedback_sender_id_fkey(full_name, role, location),
-      receiver:profiles!feedback_receiver_id_fkey(full_name, role, location)
-    `)
+    .select("*")
     .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
     .order("created_at", { ascending: false })
 
@@ -77,10 +73,41 @@ export async function getFeedbackList() {
     return []
   }
 
+  // If no data, return early
+  if (!feedbackData || feedbackData.length === 0) {
+    return []
+  }
+
+  // Get all profiles needed for the feedback items
+  const profileIds = new Set<string>()
+  feedbackData.forEach((item) => {
+    profileIds.add(item.sender_id)
+    profileIds.add(item.receiver_id)
+  })
+
+  const { data: profilesData, error: profilesError } = await supabase
+    .from("profiles")
+    .select("*")
+    .in("id", Array.from(profileIds))
+
+  if (profilesError) {
+    console.error("Error fetching profiles for feedback:", profilesError)
+    return []
+  }
+
+  const profilesMap = (profilesData || []).reduce(
+    (acc, profile) => {
+      acc[profile.id] = profile
+      return acc
+    },
+    {} as Record<string, any>,
+  )
+
   // Transform the data to match our UI needs
   return (feedbackData || []).map((item) => {
     const isSender = item.sender_id === userId
-    const otherPerson = isSender ? item.receiver : item.sender
+    const otherPersonId = isSender ? item.receiver_id : item.sender_id
+    const otherPerson = profilesMap[otherPersonId]
 
     let status = ""
     if (item.is_wish) {
@@ -92,7 +119,7 @@ export async function getFeedbackList() {
     return {
       id: item.id,
       person: otherPerson?.full_name || "Unknown",
-      personId: isSender ? item.receiver_id : item.sender_id,
+      personId: otherPersonId,
       type: isSender
         ? item.is_wish
           ? "Wish Sent"
@@ -122,34 +149,41 @@ export async function getFeedbackById(id: string) {
     return null
   }
 
-  const { data, error } = await supabase
-    .from("feedback")
-    .select(`
-      *,
-      sender:profiles!feedback_sender_id_fkey(full_name, role, location),
-      receiver:profiles!feedback_receiver_id_fkey(full_name, role, location)
-    `)
-    .eq("id", id)
-    .single()
+  // First get the feedback item
+  const { data, error } = await supabase.from("feedback").select("*").eq("id", id).single()
 
   if (error) {
     console.error("Error fetching feedback:", error)
     return null
   }
 
+  // Now get the sender and receiver profiles
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("*")
+    .in("id", [data.sender_id, data.receiver_id])
+
+  if (profilesError) {
+    console.error("Error fetching profiles for feedback:", profilesError)
+    return null
+  }
+
+  const sender = profiles.find((p) => p.id === data.sender_id)
+  const receiver = profiles.find((p) => p.id === data.receiver_id)
+
   return {
     id: data.id,
     sender: {
       id: data.sender_id,
-      name: data.sender.full_name,
-      role: data.sender.role,
-      location: data.sender.location,
+      name: sender?.full_name || "Unknown",
+      role: sender?.role || "Unknown",
+      location: sender?.location || "Unknown",
     },
     receiver: {
       id: data.receiver_id,
-      name: data.receiver.full_name,
-      role: data.receiver.role,
-      location: data.receiver.location,
+      name: receiver?.full_name || "Unknown",
+      role: receiver?.role || "Unknown",
+      location: receiver?.location || "Unknown",
     },
     title: data.title,
     content: data.content,
@@ -195,4 +229,16 @@ export async function createFeedback(formData: FormData) {
 
   revalidatePath("/")
   redirect("/")
+}
+
+// Function to set up database relations - called from the home page
+export async function setupDatabaseRelations() {
+  try {
+    const response = await fetch("/api/setup-relations", { method: "GET" })
+    const data = await response.json()
+    return data.success
+  } catch (error) {
+    console.error("Error setting up database relations:", error)
+    return false
+  }
 }
