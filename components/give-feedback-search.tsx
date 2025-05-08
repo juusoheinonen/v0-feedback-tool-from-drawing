@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search } from "lucide-react"
+import { Search, User } from "lucide-react"
 import Link from "next/link"
 
 interface Profile {
@@ -50,11 +50,16 @@ export default function GiveFeedbackSearch({ initialProfiles }: GiveFeedbackSear
                 className="block p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{profile.full_name}</h3>
-                    <p className="text-sm text-gray-600">
-                      {profile.role} • {profile.location}
-                    </p>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                      <User size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-medium">{profile.full_name || "Unknown"}</h3>
+                      <p className="text-sm text-gray-600">
+                        {profile.role || "No role"} • {profile.location || "No location"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </Link>

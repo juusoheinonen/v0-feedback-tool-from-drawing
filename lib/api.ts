@@ -33,7 +33,10 @@ export async function getProfiles(searchQuery = "") {
     return []
   }
 
-  let query = supabase.from("profiles").select("*")
+  let query = supabase.from("profiles").select("id, full_name, role, location, avatar_url")
+
+  // Don't include the current user in the results
+  query = query.neq("id", session.user.id)
 
   if (searchQuery) {
     query = query.ilike("full_name", `%${searchQuery}%`)
@@ -46,7 +49,14 @@ export async function getProfiles(searchQuery = "") {
     return []
   }
 
-  return data || []
+  // Ensure all profiles have at least null values for required fields
+  return (data || []).map((profile) => ({
+    id: profile.id,
+    full_name: profile.full_name || null,
+    role: profile.role || null,
+    location: profile.location || null,
+    avatar_url: profile.avatar_url || null,
+  }))
 }
 
 export async function getFeedbackList() {
